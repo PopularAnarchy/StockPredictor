@@ -99,11 +99,6 @@ st.markdown(
         width: 60px;
         text-align: right;
     }
-    .pick-sentiment {
-        font-size: 12px;
-        width: 50px;
-        text-align: right;
-    }
     .pick-header {
         display: flex;
         justify-content: flex-end;
@@ -168,8 +163,7 @@ st.markdown(
         <span style="width:68px">Price</span>
         <span style="width:58px">1D</span>
         <span style="width:56px">Vol</span>
-        <span style="width:50px">News</span>
-        <span style="width:60px">Score</span>
+        <span style="width:70px">Confidence</span>
     </div>
     """,
     unsafe_allow_html=True,
@@ -188,7 +182,7 @@ def _format_volume(v):
 @st.dialog("Stock Details")
 def show_details(row):
     st.subheader(f"{row['ticker']} \u2014 {row['name']}")
-    st.metric("Model score", f"{row['final_score']*100:.1f}% likely up")
+    st.metric("Confidence", f"{row['final_score']*100:.1f}%")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -196,15 +190,11 @@ def show_details(row):
         st.metric("Price", f"${price:,.2f}" if pd.notna(price) else "\u2014")
         daily_change = row.get("return_1d")
         st.metric("1-day change", f"{daily_change*100:+.2f}%" if pd.notna(daily_change) else "\u2014")
-        rsi = row.get("rsi_14")
-        st.metric("RSI (14-day)", f"{rsi:.1f}" if pd.notna(rsi) else "\u2014")
     with col2:
         volume = row.get("volume")
         st.metric("Volume", _format_volume(volume) if pd.notna(volume) else "\u2014")
-        sentiment = row.get("news_sentiment")
-        st.metric("News sentiment", f"{sentiment:+.2f}" if pd.notna(sentiment) and sentiment != 0 else "No recent news")
-        news_count = row.get("news_count")
-        st.metric("Recent articles", int(news_count) if pd.notna(news_count) else 0)
+        rsi = row.get("rsi_14")
+        st.metric("RSI (14-day)", f"{rsi:.1f}" if pd.notna(rsi) else "\u2014")
 
     st.markdown("**Trend vs. moving averages**")
     for label, col in [("10-day", "price_vs_sma10"), ("20-day", "price_vs_sma20"), ("50-day", "price_vs_sma50")]:
@@ -216,14 +206,6 @@ def show_details(row):
 
 
 for i, row in top_picks.iterrows():
-    sentiment = row.get("news_sentiment", 0)
-    if pd.notna(sentiment) and sentiment != 0:
-        sentiment_str = f"{sentiment:+.2f}"
-        sentiment_color = "#34d399" if sentiment > 0 else "#f87171"
-    else:
-        sentiment_str = "\u2014"
-        sentiment_color = "#6b7280"
-
     price = row.get("close")
     price_str = f"${price:,.2f}" if pd.notna(price) else "\u2014"
 
@@ -249,7 +231,6 @@ for i, row in top_picks.iterrows():
                 <span class="pick-price">{price_str}</span>
                 <span class="pick-change" style="color:{change_color}">{change_str}</span>
                 <span class="pick-volume">{volume_str}</span>
-                <span class="pick-sentiment" style="color:{sentiment_color}">{sentiment_str}</span>
                 <span class="pick-score">{row['final_score']*100:.1f}%</span>
             </div>
         </div>
