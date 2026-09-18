@@ -136,7 +136,7 @@ st.markdown(
 )
 
 st.title("\U0001F4C8 Stock Predictor")
-st.caption("Which stocks are most likely to rise over the next trading week")
+st.caption("AI-powered predictions on which stocks are likely to rise this week")
 
 PREDICTIONS_FILE = "latest_predictions.csv"
 
@@ -194,7 +194,20 @@ def show_details(row):
         volume = row.get("volume")
         st.metric("Volume", _format_volume(volume) if pd.notna(volume) else "\u2014")
         rsi = row.get("rsi_14")
-        st.metric("RSI (14-day)", f"{rsi:.1f}" if pd.notna(rsi) else "\u2014")
+        if pd.notna(rsi):
+            if rsi >= 70:
+                rsi_label = "Overbought \u2014 may be due for a pullback"
+            elif rsi <= 30:
+                rsi_label = "Oversold \u2014 may be due for a bounce"
+            elif rsi < 45:
+                rsi_label = "Leaning weak recently"
+            elif rsi > 55:
+                rsi_label = "Leaning strong recently"
+            else:
+                rsi_label = "Neutral, no strong recent trend"
+            st.metric("Recent momentum", rsi_label)
+        else:
+            st.metric("Recent momentum", "\u2014")
 
     st.markdown("**Trend vs. moving averages**")
     for label, col in [("10-day", "price_vs_sma10"), ("20-day", "price_vs_sma20"), ("50-day", "price_vs_sma50")]:
