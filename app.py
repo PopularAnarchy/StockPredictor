@@ -29,7 +29,26 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    .stApp { background-color: #0e1117; }
+    .stApp {
+        background: linear-gradient(180deg, #0a0d12 0%, #0e1117 40%, #0e1117 100%);
+    }
+    .hero-banner {
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        border: 1px solid #2a2e37;
+        background: linear-gradient(135deg, #131720 0%, #0e1117 100%);
+    }
+    .logo-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 2px;
+    }
+    .pick-icon {
+        width: 16px;
+        flex-shrink: 0;
+    }
     .pick-row {
         display: flex;
         align-items: center;
@@ -135,7 +154,35 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("\U0001F4C8 Stock Predictor")
+st.markdown(
+    """
+    <div class="hero-banner">
+    <svg viewBox="0 0 800 140" width="100%" height="140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+            <linearGradient id="lineFade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#34d399" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+        <polygon points="0,110 40,95 90,100 140,70 190,80 240,55 290,60 340,35 390,45 440,20 490,30 540,15 590,25 640,10 690,20 740,5 800,15 800,140 0,140"
+                 fill="url(#lineFade)"/>
+        <polyline points="0,110 40,95 90,100 140,70 190,80 240,55 290,60 340,35 390,45 440,20 490,30 540,15 590,25 640,10 690,20 740,5 800,15"
+                  fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="800" cy="15" r="4" fill="#34d399"/>
+    </svg>
+    </div>
+
+    <div class="logo-row">
+        <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+            <rect width="30" height="30" rx="7" fill="#1c1f26" stroke="#2a2e37"/>
+            <polyline points="6,20 11,15 15,18 24,8" fill="none" stroke="#34d399" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="19,8 24,8 24,13" fill="none" stroke="#34d399" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span style="font-size:28px; font-weight:700; color:#f5f5f5;">Stock Predictor</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 st.caption("AI-powered predictions on which stocks are likely to rise this week")
 
 PREDICTIONS_FILE = "latest_predictions.csv"
@@ -232,11 +279,19 @@ for i, row in top_picks.iterrows():
 
     volume_str = _format_volume(row.get("volume"))
 
+    if pd.notna(daily_change) and daily_change > 0:
+        icon_svg = '<svg class="pick-icon" viewBox="0 0 16 16"><polygon points="8,3 14,13 2,13" fill="#34d399"/></svg>'
+    elif pd.notna(daily_change) and daily_change < 0:
+        icon_svg = '<svg class="pick-icon" viewBox="0 0 16 16"><polygon points="8,13 14,3 2,3" fill="#f87171"/></svg>'
+    else:
+        icon_svg = '<svg class="pick-icon" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="2" fill="#6b7280"/></svg>'
+
     st.markdown(
         f"""
         <div class="pick-row">
             <div class="pick-left">
                 <span class="pick-rank">{i+1}</span>
+                {icon_svg}
                 <span class="pick-ticker">{row['ticker']}</span>
                 <span class="pick-name">{row['name']}</span>
             </div>
